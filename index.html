@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+
 <meta charset="UTF-8">
 
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1,
-           maximum-scale=1, user-scalable=no,
+  content="width=device-width,
+           initial-scale=1,
+           maximum-scale=1,
+           user-scalable=no,
            viewport-fit=cover"
 >
 
-<title>Shin ❤️</title>
+<title>Anh yêu embe ❤️</title>
 
 <style>
+
+/* =====================================================
+   CƠ BẢN
+===================================================== */
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -20,8 +29,10 @@
 
 html,
 body {
+
   width: 100%;
   height: 100%;
+
   margin: 0;
   padding: 0;
 
@@ -29,8 +40,6 @@ body {
 
   background: #000;
 
-  /* Tối ưu iPhone */
-  min-height: 100%;
   min-height: 100dvh;
 
   touch-action: manipulation;
@@ -40,9 +49,75 @@ body {
   position: relative;
 }
 
-/* Canvas */
-#c {
+
+/* =====================================================
+   ẢNH NỀN KẾT THÚC
+===================================================== */
+
+#background {
+
   position: fixed;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  background-image:
+    url("background.jpg");
+
+  background-size: cover;
+
+  background-position: center center;
+
+  background-repeat: no-repeat;
+
+  opacity: 0;
+
+  transition:
+    opacity 4s ease;
+
+  z-index: 0;
+
+}
+
+
+/* Lớp tối phủ lên ảnh */
+
+#background::after {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  background:
+    linear-gradient(
+      rgba(0,0,0,0.25),
+      rgba(0,0,0,0.45)
+    );
+
+}
+
+
+/* Khi kết thúc */
+
+#background.show {
+
+  opacity: 1;
+
+}
+
+
+/* =====================================================
+   CANVAS
+===================================================== */
+
+#c {
+
+  position: fixed;
+
   inset: 0;
 
   width: 100%;
@@ -50,26 +125,31 @@ body {
 
   display: block;
 
-  background: #000;
+  background: transparent;
+
+  z-index: 1;
+
+  transition:
+    opacity 4s ease;
+
 }
 
-/* Nội dung ở giữa */
+
+/* =====================================================
+   CHỮ
+===================================================== */
+
 #msg {
+
   position: fixed;
 
   left: 50%;
   top: 50%;
 
   width: 90%;
-  max-width: 100%;
 
-  transform: translate(-50%, -50%);
-
-  padding:
-    env(safe-area-inset-top)
-    5vw
-    env(safe-area-inset-bottom)
-    5vw;
+  transform:
+    translate(-50%, -50%);
 
   text-align: center;
 
@@ -80,12 +160,8 @@ body {
     Arial,
     sans-serif;
 
-  /*
-    Tự động thay đổi kích thước:
-    điện thoại nhỏ -> nhỏ
-    điện thoại lớn -> lớn
-  */
-  font-size: clamp(32px, 9vw, 64px);
+  font-size:
+    clamp(32px, 9vw, 64px);
 
   line-height: 1.2;
 
@@ -96,85 +172,162 @@ body {
   opacity: 0;
 
   text-shadow:
+
     0 0 8px #ff6b9d,
+
     0 0 18px #ff3ea5,
+
     0 0 35px #ff3ea5,
+
     0 0 60px #ff1493;
 
   transition:
-    opacity 2s ease;
+    opacity 2.5s ease;
 
   pointer-events: none;
 
-  z-index: 10;
+  z-index: 2;
 
-  white-space: nowrap;
 }
 
-/* Điện thoại rất nhỏ */
+
+/* =====================================================
+   ĐIỆN THOẠI NHỎ
+===================================================== */
+
 @media (max-width: 380px) {
 
   #msg {
+
     font-size: 30px;
+
   }
 
 }
 
-/* Điện thoại ngang */
+
+/* =====================================================
+   ĐIỆN THOẠI NGANG
+===================================================== */
+
 @media (orientation: landscape) {
 
   #msg {
-    font-size: clamp(28px, 7vw, 52px);
+
+    font-size:
+      clamp(28px, 7vw, 52px);
+
   }
 
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- ================================================
+     BACKGROUND
+================================================ -->
+
+<div id="background"></div>
+
+
+<!-- ================================================
+     CANVAS
+================================================ -->
+
 <canvas id="c"></canvas>
 
+
+<!-- ================================================
+     LỜI NHẮN
+================================================ -->
+
 <div id="msg">
+
   Anh yêu embe ❤️
+
 </div>
+
 
 <script>
 
-/* =========================================================
+/* =====================================================
    CANVAS
-========================================================= */
+===================================================== */
 
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d", {
-  alpha: false
-});
+const canvas =
+  document.getElementById("c");
+
+const ctx =
+  canvas.getContext(
+    "2d",
+    {
+      alpha: true
+    }
+  );
+
 
 let width = 0;
+
 let height = 0;
+
 let dpr = 1;
 
 
-/* =========================================================
-   RESPONSIVE
-========================================================= */
+/* =====================================================
+   KIỂM TRA MOBILE
+===================================================== */
+
+const isMobile =
+  /Android|iPhone|iPad|iPod/i.test(
+    navigator.userAgent
+  );
+
+
+/* =====================================================
+   RESIZE
+===================================================== */
 
 function resize() {
 
-  width = window.innerWidth;
-  height = window.innerHeight;
+  width =
+    window.innerWidth;
 
-  /*
-    Giới hạn DPR để tránh điện thoại phải render
-    quá nhiều pixel.
-  */
-  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  height =
+    window.innerHeight;
 
-  canvas.width = Math.floor(width * dpr);
-  canvas.height = Math.floor(height * dpr);
 
-  canvas.style.width = width + "px";
-  canvas.style.height = height + "px";
+  dpr =
+    Math.min(
+      window.devicePixelRatio || 1,
+      2
+    );
+
+
+  canvas.width =
+    Math.floor(
+      width * dpr
+    );
+
+
+  canvas.height =
+    Math.floor(
+      height * dpr
+    );
+
+
+  canvas.style.width =
+    width + "px";
+
+
+  canvas.style.height =
+    height + "px";
+
 
   ctx.setTransform(
     dpr,
@@ -185,61 +338,82 @@ function resize() {
     0
   );
 
+
   createHeart();
 
 }
 
+
 window.addEventListener(
   "resize",
   resize,
-  { passive: true }
+  {
+    passive: true
+  }
 );
+
 
 window.addEventListener(
   "orientationchange",
   () => {
-    setTimeout(resize, 300);
+
+    setTimeout(
+      resize,
+      300
+    );
+
   },
-  { passive: true }
+  {
+    passive: true
+  }
 );
 
 
-/* =========================================================
+/* =====================================================
    CENTER
-========================================================= */
+===================================================== */
 
 function cx() {
+
   return width / 2;
+
 }
+
 
 function cy() {
+
   return height / 2;
+
 }
 
 
-/* =========================================================
-   HEART POINTS
-========================================================= */
+/* =====================================================
+   HEART
+===================================================== */
 
 let pts = [];
+
 
 function createHeart() {
 
   pts = [];
 
+
+  const minSize =
+    Math.min(
+      width,
+      height
+    );
+
+
   /*
-    Kích thước trái tim tự động theo màn hình.
-
-    Điện thoại dọc:
-    chiều rộng khoảng 78–82% màn hình.
-
-    Điện thoại ngang:
-    tự điều chỉnh theo chiều cao.
+    Kích thước trái tim
+    tự động theo điện thoại
   */
 
-  const minSize = Math.min(width, height);
+  const scale =
+    minSize / 42;
 
-  const scale = minSize / 42;
 
   for (
     let t = 0;
@@ -247,19 +421,35 @@ function createHeart() {
     t += 0.008
   ) {
 
+
     const x =
       16 *
-      Math.pow(Math.sin(t), 3);
+      Math.pow(
+        Math.sin(t),
+        3
+      );
+
 
     const y =
       13 * Math.cos(t)
-      - 5 * Math.cos(2 * t)
-      - 2 * Math.cos(3 * t)
+
+      - 5 *
+        Math.cos(2 * t)
+
+      - 2 *
+        Math.cos(3 * t)
+
       - Math.cos(4 * t);
 
+
     pts.push({
-      x: x * scale,
-      y: -y * scale
+
+      x:
+        x * scale,
+
+      y:
+        -y * scale
+
     });
 
   }
@@ -267,23 +457,15 @@ function createHeart() {
 }
 
 
-/* =========================================================
+/* =====================================================
    PARTICLES
-========================================================= */
+===================================================== */
 
-/*
-  Điện thoại:
-  2500–3200 hạt là đủ đẹp.
+const N =
+  isMobile
+    ? 2800
+    : 4000;
 
-  Máy tính có thể tăng lên 4000.
-*/
-
-const isMobile =
-  /Android|iPhone|iPad|iPod/i.test(
-    navigator.userAgent
-  );
-
-const N = isMobile ? 2800 : 4000;
 
 const particles = [];
 
@@ -292,28 +474,39 @@ function createParticles() {
 
   particles.length = 0;
 
-  for (let i = 0; i < N; i++) {
+
+  for (
+    let i = 0;
+    i < N;
+    i++
+  ) {
+
 
     const p =
       pts[
         Math.floor(
-          Math.random() * pts.length
+          Math.random() *
+          pts.length
         )
       ];
+
 
     const angle =
       Math.random() *
       Math.PI *
       2;
 
-    /*
-      Khoảng cách xuất phát
-      tương đối với màn hình.
-    */
 
     const distance =
-      Math.max(width, height) *
-      (0.7 + Math.random() * 0.9);
+      Math.max(
+        width,
+        height
+      ) *
+      (
+        0.7 +
+        Math.random() * 0.9
+      );
+
 
     particles.push({
 
@@ -322,22 +515,35 @@ function createParticles() {
         Math.cos(angle) *
         distance,
 
+
       sy:
         cy() +
         Math.sin(angle) *
         distance,
 
-      tx: p.x,
-      ty: p.y,
+
+      tx:
+        p.x,
+
+
+      ty:
+        p.y,
+
 
       angle:
-        Math.random() * Math.PI * 2,
+        Math.random() *
+        Math.PI *
+        2,
+
 
       hue:
-        Math.random() * 360,
+        Math.random() *
+        360,
+
 
       delay:
-        Math.random() * 1.8
+        Math.random() *
+        1.8
 
     });
 
@@ -346,9 +552,9 @@ function createParticles() {
 }
 
 
-/* =========================================================
-   FIREWORKS
-========================================================= */
+/* =====================================================
+   PHÁO HOA
+===================================================== */
 
 let fireworks = [];
 
@@ -357,36 +563,49 @@ function createFirework() {
 
   fireworks = [];
 
-  /*
-    Ít hơn trên điện thoại
-    để tránh tụt FPS.
-  */
 
   const amount =
-    isMobile ? 160 : 250;
+    isMobile
+      ? 160
+      : 250;
 
-  for (let i = 0; i < amount; i++) {
+
+  for (
+    let i = 0;
+    i < amount;
+    i++
+  ) {
+
 
     fireworks.push({
 
-      x: cx(),
-      y: cy(),
+      x:
+        cx(),
+
+
+      y:
+        cy(),
+
 
       angle:
         Math.random() *
         Math.PI *
         2,
 
+
       velocity:
         2 +
         Math.random() * 5,
+
 
       life:
         80 +
         Math.random() * 40,
 
+
       hue:
-        Math.random() * 360
+        Math.random() *
+        360
 
     });
 
@@ -395,33 +614,42 @@ function createFirework() {
 }
 
 
-/* =========================================================
+/* =====================================================
    ANIMATION
-========================================================= */
+===================================================== */
 
 let startTime = null;
 
 let heartFinished = false;
 
-let messageShown = false;
+let backgroundShown = false;
 
 
 function draw(timestamp) {
 
+
   if (!startTime) {
-    startTime = timestamp;
+
+    startTime =
+      timestamp;
+
   }
 
+
   const elapsed =
-    (timestamp - startTime) / 1000;
+    (
+      timestamp -
+      startTime
+    ) / 1000;
 
 
-  /* -------------------------------------------------------
+  /* ================================================
      BACKGROUND
-  ------------------------------------------------------- */
+  ================================================ */
 
   ctx.fillStyle =
     "rgba(0,0,0,0.15)";
+
 
   ctx.fillRect(
     0,
@@ -431,221 +659,339 @@ function draw(timestamp) {
   );
 
 
-  /* -------------------------------------------------------
-     HEART PARTICLES
-  ------------------------------------------------------- */
+  /* ================================================
+     PARTICLES
+  ================================================ */
 
   let completed = 0;
 
 
-  particles.forEach(p => {
-
-    let progress =
-      (elapsed - p.delay) / 5;
+  particles.forEach(
+    p => {
 
 
-    progress =
-      Math.max(
-        0,
-        Math.min(
-          1,
-          progress
+      let progress =
+        (
+          elapsed -
+          p.delay
+        ) / 5;
+
+
+      progress =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            progress
+          )
+        );
+
+
+      if (
+        progress >= 1
+      ) {
+
+        completed++;
+
+      }
+
+
+      const spiral =
+        (1 - progress) *
+        180;
+
+
+      const angle =
+        p.angle +
+        progress * 12;
+
+
+      const x =
+
+        (1 - progress) *
+        p.sx
+
+        +
+
+        progress *
+        (
+          cx() +
+          p.tx
         )
+
+        +
+
+        Math.cos(angle) *
+        spiral;
+
+
+      const y =
+
+        (1 - progress) *
+        p.sy
+
+        +
+
+        progress *
+        (
+          cy() +
+          p.ty
+        )
+
+        +
+
+        Math.sin(angle) *
+        spiral;
+
+
+      ctx.beginPath();
+
+
+      const color =
+
+        `hsl(
+          ${(p.hue + elapsed * 80) % 360}
+          100%
+          60%
+        )`;
+
+
+      ctx.fillStyle =
+        color;
+
+
+      ctx.shadowBlur =
+        isMobile
+          ? 7
+          : 12;
+
+
+      ctx.shadowColor =
+        color;
+
+
+      ctx.arc(
+
+        x,
+        y,
+
+        isMobile
+          ? 1.35
+          : 1.6,
+
+        0,
+        Math.PI * 2
+
       );
 
 
-    if (progress >= 1) {
-      completed++;
+      ctx.fill();
+
+
     }
+  );
 
 
-    /*
-      Hiệu ứng xoắn
-    */
-
-    const spiral =
-      (1 - progress) * 180;
-
-    const angle =
-      p.angle +
-      progress * 12;
-
-
-    const x =
-      (1 - progress) * p.sx
-      +
-      progress *
-      (cx() + p.tx)
-      +
-      Math.cos(angle) *
-      spiral;
-
-
-    const y =
-      (1 - progress) * p.sy
-      +
-      progress *
-      (cy() + p.ty)
-      +
-      Math.sin(angle) *
-      spiral;
-
-
-    ctx.beginPath();
-
-
-    const color =
-      `hsl(${(p.hue + elapsed * 80) % 360} 100% 60%)`;
-
-
-    ctx.fillStyle = color;
-
-    ctx.shadowBlur =
-      isMobile ? 7 : 12;
-
-    ctx.shadowColor =
-      color;
-
-
-    ctx.arc(
-      x,
-      y,
-      isMobile ? 1.35 : 1.6,
-      0,
-      Math.PI * 2
-    );
-
-
-    ctx.fill();
-
-  });
-
-
-  /* -------------------------------------------------------
-     HEART COMPLETE
-  ------------------------------------------------------- */
+  /* ================================================
+     TRÁI TIM HOÀN THÀNH
+  ================================================ */
 
   if (
     completed >=
     particles.length * 0.995
+    &&
+    !heartFinished
   ) {
 
-    if (!heartFinished) {
 
-      heartFinished = true;
+    heartFinished = true;
 
-      /*
-        Hiện chữ
-      */
 
-      if (!messageShown) {
+    /* ---------------------------------------------
+       ẢNH NỀN XUẤT HIỆN
+    --------------------------------------------- */
+
+    setTimeout(
+      () => {
+
 
         document
-          .getElementById("msg")
-          .style.opacity = "1";
+          .getElementById(
+            "background"
+          )
+          .classList.add(
+            "show"
+          );
 
-        messageShown = true;
 
-      }
+        /*
+          Giảm canvas xuống
+          nhưng vẫn giữ hạt
+        */
+
+        canvas.style.opacity =
+          "0.45";
 
 
-      /*
-        Pháo hoa
-      */
+      },
+      500
+    );
 
-      if (fireworks.length === 0) {
 
-        createFirework();
+    /* ---------------------------------------------
+       HIỆN CHỮ
+    --------------------------------------------- */
 
-      }
+    setTimeout(
+      () => {
 
-    }
+
+        document
+          .getElementById(
+            "msg"
+          )
+          .style.opacity =
+          "1";
+
+
+      },
+      1200
+    );
+
+
+    /* ---------------------------------------------
+       PHÁO HOA
+    --------------------------------------------- */
+
+    setTimeout(
+      () => {
+
+
+        if (
+          fireworks.length === 0
+        ) {
+
+          createFirework();
+
+        }
+
+
+      },
+      1500
+    );
 
   }
 
 
-  /* -------------------------------------------------------
+  /* ================================================
      FIREWORKS
-  ------------------------------------------------------- */
+  ================================================ */
 
-  fireworks.forEach(f => {
-
-    f.x +=
-      Math.cos(f.angle) *
-      f.velocity;
-
-    f.y +=
-      Math.sin(f.angle) *
-      f.velocity;
+  fireworks.forEach(
+    f => {
 
 
-    f.velocity *= 0.985;
-
-    f.life--;
-
-
-    const alpha =
-      Math.max(
-        f.life,
-        0
-      ) / 120;
+      f.x +=
+        Math.cos(
+          f.angle
+        ) *
+        f.velocity;
 
 
-    ctx.beginPath();
+      f.y +=
+        Math.sin(
+          f.angle
+        ) *
+        f.velocity;
 
 
-    ctx.fillStyle =
-      `hsla(
-        ${f.hue},
-        100%,
-        60%,
-        ${alpha}
-      )`;
+      f.velocity *=
+        0.985;
 
 
-    ctx.shadowBlur =
-      isMobile ? 5 : 8;
-
-    ctx.shadowColor =
-      ctx.fillStyle;
+      f.life--;
 
 
-    ctx.arc(
-      f.x,
-      f.y,
-      isMobile ? 1.6 : 2,
-      0,
-      Math.PI * 2
-    );
+      const alpha =
+        Math.max(
+          f.life,
+          0
+        ) / 120;
 
 
-    ctx.fill();
+      ctx.beginPath();
 
-  });
+
+      ctx.fillStyle =
+
+        `hsla(
+          ${f.hue},
+          100%,
+          60%,
+          ${alpha}
+        )`;
+
+
+      ctx.shadowBlur =
+        isMobile
+          ? 5
+          : 8;
+
+
+      ctx.shadowColor =
+        ctx.fillStyle;
+
+
+      ctx.arc(
+
+        f.x,
+        f.y,
+
+        isMobile
+          ? 1.6
+          : 2,
+
+        0,
+        Math.PI * 2
+
+      );
+
+
+      ctx.fill();
+
+
+    }
+  );
 
 
   fireworks =
     fireworks.filter(
-      f => f.life > 0
+      f =>
+        f.life > 0
     );
 
 
-  requestAnimationFrame(draw);
+  requestAnimationFrame(
+    draw
+  );
 
 }
 
 
-/* =========================================================
-   START
-========================================================= */
+/* =====================================================
+   KHỞI ĐỘNG
+===================================================== */
 
 resize();
 
 createParticles();
 
-requestAnimationFrame(draw);
+requestAnimationFrame(
+  draw
+);
 
 </script>
 
 </body>
+
 </html>
