@@ -2,111 +2,650 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1,
+           maximum-scale=1, user-scalable=no,
+           viewport-fit=cover"
+>
+
 <title>Shin ❤️</title>
+
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#000}
-canvas{display:block}
-#msg{
-position:absolute;left:50%;top:50%;
-transform:translate(-50%,-50%);
-font:700 64px Arial,sans-serif;
-color:#fff;opacity:0;
-text-shadow:0 0 10px #953131,0 0 25px #ff3ea5,0 0 40px #ff3ea5;
-transition:opacity 2s;
-pointer-events:none;
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+
+  overflow: hidden;
+
+  background: #000;
+
+  /* Tối ưu iPhone */
+  min-height: 100%;
+  min-height: 100dvh;
+
+  touch-action: manipulation;
+}
+
+body {
+  position: relative;
+}
+
+/* Canvas */
+#c {
+  position: fixed;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  background: #000;
+}
+
+/* Nội dung ở giữa */
+#msg {
+  position: fixed;
+
+  left: 50%;
+  top: 50%;
+
+  width: 90%;
+  max-width: 100%;
+
+  transform: translate(-50%, -50%);
+
+  padding:
+    env(safe-area-inset-top)
+    5vw
+    env(safe-area-inset-bottom)
+    5vw;
+
+  text-align: center;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+  /*
+    Tự động thay đổi kích thước:
+    điện thoại nhỏ -> nhỏ
+    điện thoại lớn -> lớn
+  */
+  font-size: clamp(32px, 9vw, 64px);
+
+  line-height: 1.2;
+
+  font-weight: 700;
+
+  color: #fff;
+
+  opacity: 0;
+
+  text-shadow:
+    0 0 8px #ff6b9d,
+    0 0 18px #ff3ea5,
+    0 0 35px #ff3ea5,
+    0 0 60px #ff1493;
+
+  transition:
+    opacity 2s ease;
+
+  pointer-events: none;
+
+  z-index: 10;
+
+  white-space: nowrap;
+}
+
+/* Điện thoại rất nhỏ */
+@media (max-width: 380px) {
+
+  #msg {
+    font-size: 30px;
+  }
+
+}
+
+/* Điện thoại ngang */
+@media (orientation: landscape) {
+
+  #msg {
+    font-size: clamp(28px, 7vw, 52px);
+  }
+
 }
 </style>
 </head>
+
 <body>
+
 <canvas id="c"></canvas>
-<div id="msg">Anh yêu embe ❤️</div>
+
+<div id="msg">
+  Anh yêu embe ❤️
+</div>
+
 <script>
-const canvas=document.getElementById("c");
-const ctx=canvas.getContext("2d");
-function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
-addEventListener("resize",resize);resize();
 
-const cx=()=>canvas.width/2, cy=()=>canvas.height/2;
-const pts=[];
-const scale=Math.min(canvas.width,canvas.height)/42;
+/* =========================================================
+   CANVAS
+========================================================= */
 
-for(let t=0;t<Math.PI*2;t+=0.008){
- let x=16*Math.pow(Math.sin(t),3);
- let y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
- pts.push({x:x*scale,y:-y*scale});
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d", {
+  alpha: false
+});
+
+let width = 0;
+let height = 0;
+let dpr = 1;
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+function resize() {
+
+  width = window.innerWidth;
+  height = window.innerHeight;
+
+  /*
+    Giới hạn DPR để tránh điện thoại phải render
+    quá nhiều pixel.
+  */
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  canvas.width = Math.floor(width * dpr);
+  canvas.height = Math.floor(height * dpr);
+
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+  createHeart();
+
 }
 
-const N=4000;
-const particles=[];
-for(let i=0;i<N;i++){
- const p=pts[i%pts.length];
- const a=Math.random()*Math.PI*2;
- const r=Math.max(canvas.width,canvas.height)*(0.8+Math.random()*0.8);
- particles.push({
-  sx:cx()+Math.cos(a)*r,
-  sy:cy()+Math.sin(a)*r,
-  tx:p.x,ty:p.y,
-  ang:Math.random()*8,
-  hue:(i/N)*360,
-  prog:0,
-  delay:Math.random()*2
- });
-}
-let start=null, fireworks=[];
-function firework(){
- for(let k=0;k<250;k++){
-   fireworks.push({
-    x:cx(),y:cy(),
-    a:Math.random()*Math.PI*2,
-    v:2+Math.random()*5,
-    life:80+Math.random()*40,
-    hue:Math.random()*360
-   });
- }
-}
-function draw(ts){
- if(!start)start=ts;
- const t=(ts-start)/1000;
- ctx.fillStyle="rgba(0,0,0,.15)";
- ctx.fillRect(0,0,canvas.width,canvas.height);
+window.addEventListener(
+  "resize",
+  resize,
+  { passive: true }
+);
 
- let done=0;
- particles.forEach(p=>{
-   let pr=Math.max(0,Math.min(1,(t-p.delay)/5));
-   p.prog=pr;
-   if(pr>=1)done++;
-   const spiral=(1-pr)*220;
-   const ang=p.ang+pr*12;
-   const x=(1-pr)*p.sx+pr*(cx()+p.tx)+Math.cos(ang)*spiral;
-   const y=(1-pr)*p.sy+pr*(cy()+p.ty)+Math.sin(ang)*spiral;
-   ctx.beginPath();
-   ctx.fillStyle=`hsl(${(p.hue+t*80)%360} 100% 60%)`;
-   ctx.shadowBlur=12;
-   ctx.shadowColor=ctx.fillStyle;
-   ctx.arc(x,y,1.6,0,Math.PI*2);
-   ctx.fill();
- });
- if(done===N){
-   document.getElementById("msg").style.opacity=1;
-   if(fireworks.length===0) firework();
- }
- fireworks.forEach((f,i)=>{
-   f.x+=Math.cos(f.a)*f.v;
-   f.y+=Math.sin(f.a)*f.v;
-   f.v*=0.985;
-   f.life--;
-   ctx.beginPath();
-   ctx.fillStyle=`hsla(${f.hue},100%,60%,${Math.max(f.life,0)/120})`;
-   ctx.shadowBlur=8;
-   ctx.shadowColor=ctx.fillStyle;
-   ctx.arc(f.x,f.y,2,0,Math.PI*2);
-   ctx.fill();
- });
- fireworks=fireworks.filter(f=>f.life>0);
- requestAnimationFrame(draw);
+window.addEventListener(
+  "orientationchange",
+  () => {
+    setTimeout(resize, 300);
+  },
+  { passive: true }
+);
+
+
+/* =========================================================
+   CENTER
+========================================================= */
+
+function cx() {
+  return width / 2;
 }
+
+function cy() {
+  return height / 2;
+}
+
+
+/* =========================================================
+   HEART POINTS
+========================================================= */
+
+let pts = [];
+
+function createHeart() {
+
+  pts = [];
+
+  /*
+    Kích thước trái tim tự động theo màn hình.
+
+    Điện thoại dọc:
+    chiều rộng khoảng 78–82% màn hình.
+
+    Điện thoại ngang:
+    tự điều chỉnh theo chiều cao.
+  */
+
+  const minSize = Math.min(width, height);
+
+  const scale = minSize / 42;
+
+  for (
+    let t = 0;
+    t < Math.PI * 2;
+    t += 0.008
+  ) {
+
+    const x =
+      16 *
+      Math.pow(Math.sin(t), 3);
+
+    const y =
+      13 * Math.cos(t)
+      - 5 * Math.cos(2 * t)
+      - 2 * Math.cos(3 * t)
+      - Math.cos(4 * t);
+
+    pts.push({
+      x: x * scale,
+      y: -y * scale
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   PARTICLES
+========================================================= */
+
+/*
+  Điện thoại:
+  2500–3200 hạt là đủ đẹp.
+
+  Máy tính có thể tăng lên 4000.
+*/
+
+const isMobile =
+  /Android|iPhone|iPad|iPod/i.test(
+    navigator.userAgent
+  );
+
+const N = isMobile ? 2800 : 4000;
+
+const particles = [];
+
+
+function createParticles() {
+
+  particles.length = 0;
+
+  for (let i = 0; i < N; i++) {
+
+    const p =
+      pts[
+        Math.floor(
+          Math.random() * pts.length
+        )
+      ];
+
+    const angle =
+      Math.random() *
+      Math.PI *
+      2;
+
+    /*
+      Khoảng cách xuất phát
+      tương đối với màn hình.
+    */
+
+    const distance =
+      Math.max(width, height) *
+      (0.7 + Math.random() * 0.9);
+
+    particles.push({
+
+      sx:
+        cx() +
+        Math.cos(angle) *
+        distance,
+
+      sy:
+        cy() +
+        Math.sin(angle) *
+        distance,
+
+      tx: p.x,
+      ty: p.y,
+
+      angle:
+        Math.random() * Math.PI * 2,
+
+      hue:
+        Math.random() * 360,
+
+      delay:
+        Math.random() * 1.8
+
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   FIREWORKS
+========================================================= */
+
+let fireworks = [];
+
+
+function createFirework() {
+
+  fireworks = [];
+
+  /*
+    Ít hơn trên điện thoại
+    để tránh tụt FPS.
+  */
+
+  const amount =
+    isMobile ? 160 : 250;
+
+  for (let i = 0; i < amount; i++) {
+
+    fireworks.push({
+
+      x: cx(),
+      y: cy(),
+
+      angle:
+        Math.random() *
+        Math.PI *
+        2,
+
+      velocity:
+        2 +
+        Math.random() * 5,
+
+      life:
+        80 +
+        Math.random() * 40,
+
+      hue:
+        Math.random() * 360
+
+    });
+
+  }
+
+}
+
+
+/* =========================================================
+   ANIMATION
+========================================================= */
+
+let startTime = null;
+
+let heartFinished = false;
+
+let messageShown = false;
+
+
+function draw(timestamp) {
+
+  if (!startTime) {
+    startTime = timestamp;
+  }
+
+  const elapsed =
+    (timestamp - startTime) / 1000;
+
+
+  /* -------------------------------------------------------
+     BACKGROUND
+  ------------------------------------------------------- */
+
+  ctx.fillStyle =
+    "rgba(0,0,0,0.15)";
+
+  ctx.fillRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  /* -------------------------------------------------------
+     HEART PARTICLES
+  ------------------------------------------------------- */
+
+  let completed = 0;
+
+
+  particles.forEach(p => {
+
+    let progress =
+      (elapsed - p.delay) / 5;
+
+
+    progress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          progress
+        )
+      );
+
+
+    if (progress >= 1) {
+      completed++;
+    }
+
+
+    /*
+      Hiệu ứng xoắn
+    */
+
+    const spiral =
+      (1 - progress) * 180;
+
+    const angle =
+      p.angle +
+      progress * 12;
+
+
+    const x =
+      (1 - progress) * p.sx
+      +
+      progress *
+      (cx() + p.tx)
+      +
+      Math.cos(angle) *
+      spiral;
+
+
+    const y =
+      (1 - progress) * p.sy
+      +
+      progress *
+      (cy() + p.ty)
+      +
+      Math.sin(angle) *
+      spiral;
+
+
+    ctx.beginPath();
+
+
+    const color =
+      `hsl(${(p.hue + elapsed * 80) % 360} 100% 60%)`;
+
+
+    ctx.fillStyle = color;
+
+    ctx.shadowBlur =
+      isMobile ? 7 : 12;
+
+    ctx.shadowColor =
+      color;
+
+
+    ctx.arc(
+      x,
+      y,
+      isMobile ? 1.35 : 1.6,
+      0,
+      Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+  });
+
+
+  /* -------------------------------------------------------
+     HEART COMPLETE
+  ------------------------------------------------------- */
+
+  if (
+    completed >=
+    particles.length * 0.995
+  ) {
+
+    if (!heartFinished) {
+
+      heartFinished = true;
+
+      /*
+        Hiện chữ
+      */
+
+      if (!messageShown) {
+
+        document
+          .getElementById("msg")
+          .style.opacity = "1";
+
+        messageShown = true;
+
+      }
+
+
+      /*
+        Pháo hoa
+      */
+
+      if (fireworks.length === 0) {
+
+        createFirework();
+
+      }
+
+    }
+
+  }
+
+
+  /* -------------------------------------------------------
+     FIREWORKS
+  ------------------------------------------------------- */
+
+  fireworks.forEach(f => {
+
+    f.x +=
+      Math.cos(f.angle) *
+      f.velocity;
+
+    f.y +=
+      Math.sin(f.angle) *
+      f.velocity;
+
+
+    f.velocity *= 0.985;
+
+    f.life--;
+
+
+    const alpha =
+      Math.max(
+        f.life,
+        0
+      ) / 120;
+
+
+    ctx.beginPath();
+
+
+    ctx.fillStyle =
+      `hsla(
+        ${f.hue},
+        100%,
+        60%,
+        ${alpha}
+      )`;
+
+
+    ctx.shadowBlur =
+      isMobile ? 5 : 8;
+
+    ctx.shadowColor =
+      ctx.fillStyle;
+
+
+    ctx.arc(
+      f.x,
+      f.y,
+      isMobile ? 1.6 : 2,
+      0,
+      Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+  });
+
+
+  fireworks =
+    fireworks.filter(
+      f => f.life > 0
+    );
+
+
+  requestAnimationFrame(draw);
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+resize();
+
+createParticles();
+
 requestAnimationFrame(draw);
+
 </script>
+
 </body>
 </html>
